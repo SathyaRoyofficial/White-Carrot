@@ -9,8 +9,8 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <img src="/logo.png" alt="Whitecarrot" className="h-8 object-contain" />
         </div>
-        <div className="flex items-center gap-4">
-          <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Link href="/login" className="hidden sm:block text-sm font-medium text-gray-600 hover:text-gray-900">
             Log in
           </Link>
           <Link href="/login">
@@ -24,11 +24,11 @@ export default function Home() {
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-6 md:px-12 py-24 text-center">
         <div className="inline-flex items-center rounded-full border border-[#5138EE]/20 bg-[#5138EE]/5 px-3 py-1 text-sm font-medium text-[#5138EE] mb-8">
-          🚀 The Spotify-like experience for hiring
+          🚀 The Baap of all hiring platforms
         </div>
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-6 w-full max-w-4xl mx-auto leading-tight">
-          Hiring Made Easy. <br/>
-          <span className="text-[#5138EE]">Build beautiful careers pages</span><br/> in minutes.
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-6 w-full max-w-4xl mx-auto leading-tight">
+          Hiring Made Easy. <br />
+          <span className="text-[#5138EE]">Build beautiful careers pages</span><br /> in minutes.
         </h1>
         <p className="text-lg md:text-xl text-gray-500 mb-10 w-full max-w-2xl mx-auto">
           Instead of boring ATS pages, create interactive, branded, and storytelling career environments that candidates actually want to read.
