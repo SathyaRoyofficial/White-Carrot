@@ -89,14 +89,14 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row flex-1 overflow-y-auto lg:overflow-hidden relative">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-y-auto lg:overflow-hidden relative gap-4 lg:gap-0 bg-gray-50 lg:bg-transparent pb-8 lg:pb-0">
         {/* Left Panel - Controls */}
-        <div className="w-full lg:w-80 flex-shrink-0 bg-white border-b lg:border-b-0 lg:border-r border-gray-200 overflow-y-visible lg:overflow-y-auto order-3 lg:order-1">
+        <div className="w-full lg:w-80 flex-shrink-0 bg-white border-y lg:border-y-0 lg:border-r border-gray-200 overflow-y-visible lg:overflow-y-auto order-3 lg:order-1 shadow-sm lg:shadow-none">
           <LeftPanel />
         </div>
 
         {/* Center - Live Preview Area */}
-        <div className="w-full lg:flex-1 overflow-y-auto relative flex flex-col items-center p-0 lg:p-8 bg-gray-50/50 order-1 lg:order-2 h-[50vh] lg:h-auto border-b lg:border-b-0 border-gray-200 shrink-0 sticky top-0 z-20 lg:static">
+        <div className="w-full lg:flex-1 overflow-y-auto relative flex flex-col items-center p-0 lg:p-8 bg-white lg:bg-gray-50/50 order-1 lg:order-2 h-[50vh] lg:h-auto border-b lg:border-b-0 border-gray-200 shrink-0 sticky top-0 z-20 lg:static shadow-sm lg:shadow-none">
           <div className="hidden lg:flex mb-4 text-sm font-medium text-gray-500 items-center justify-between w-full max-w-[1000px]">
             <span>Live Preview</span>
             <div className="flex gap-2">
@@ -111,7 +111,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
         </div>
 
         {/* Right Panel - Properties */}
-        <div className="w-full lg:w-80 flex-shrink-0 bg-white border-b lg:border-b-0 lg:border-l border-gray-200 overflow-y-visible lg:overflow-y-auto order-2 lg:order-3">
+        <div className={`w-full lg:w-80 flex-shrink-0 bg-white border-y lg:border-y-0 lg:border-l border-gray-200 overflow-y-visible lg:overflow-y-auto order-2 lg:order-3 shadow-md lg:shadow-none ${!useBuilderStore().selectedSectionId ? 'hidden lg:block' : 'block'}`}>
           <RightPanel />
         </div>
       </div>
