@@ -13,11 +13,8 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
   const pageId = unwrappedParams.id
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
-  const { setInitialData } = useBuilderStore()
+  const { setInitialData, theme, updateTheme } = useBuilderStore()
   const [error, setError] = useState<string | null>(null)
-  
-  const [projectName, setProjectName] = useState('')
-  const [isStarred, setIsStarred] = useState(false)
 
   useEffect(() => {
     async function loadData() {
@@ -37,10 +34,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
           throw new Error('Project not found')
         }
 
-        setProjectName(pageData.name || 'Untitled Career Page')
-        setIsStarred(pageData.is_starred || false)
-
-        const theme = pageData.theme_settings || {}
+        const themeToLoad = pageData.theme_settings || {}
 
         const { data: sections } = await supabase
           .from('sections')
@@ -48,7 +42,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
           .eq('page_id', pageId)
           .order('order_index')
 
-        setInitialData(pageId, theme, sections || [])
+        setInitialData(pageId, themeToLoad, sections || [])
         setLoading(false)
       } catch (err: any) {
         setError(err.message)
@@ -59,7 +53,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
   }, [pageId])
 
   const handleUpdateName = async (newName: string) => {
-    setProjectName(newName)
+    updateTheme({ projectName: newName } as any)
     const { data } = await supabase.from('pages').select('theme_settings').eq('id', pageId).single()
     if (data) {
       await supabase.from('pages').update({ theme_settings: { ...data.theme_settings, projectName: newName } }).eq('id', pageId)
@@ -67,8 +61,8 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
   }
 
   const toggleStar = async () => {
-    const updated = !isStarred
-    setIsStarred(updated)
+    const updated = !(theme as any).is_starred
+    updateTheme({ is_starred: updated } as any)
     const { data } = await supabase.from('pages').select('theme_settings').eq('id', pageId).single()
     if (data) {
       await supabase.from('pages').update({ theme_settings: { ...data.theme_settings, is_starred: updated } }).eq('id', pageId)
@@ -84,13 +78,13 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
       <div className="h-14 bg-white border-b border-gray-200 px-6 flex items-center justify-between z-10 shrink-0 shadow-sm relative">
         <div className="flex items-center gap-3">
            <input 
-             value={projectName}
-             onChange={(e) => setProjectName(e.target.value)}
+             value={(theme as any).projectName || 'Untitled Career Page'}
+             onChange={(e) => updateTheme({ projectName: e.target.value } as any)}
              onBlur={(e) => handleUpdateName(e.target.value)}
              className="text-lg font-bold text-gray-900 bg-transparent border-none outline-none hover:bg-gray-50 focus:bg-gray-50 px-2 py-1 rounded transition-colors"
            />
            <button onClick={toggleStar} className="focus:outline-none transition-transform hover:scale-110">
-             <Star className={`w-5 h-5 ${isStarred ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 hover:text-gray-400'}`} />
+             <Star className={`w-5 h-5 ${(theme as any).is_starred ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 hover:text-gray-400'}`} />
            </button>
         </div>
       </div>

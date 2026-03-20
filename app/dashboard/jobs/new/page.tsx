@@ -6,10 +6,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { ArrowLeft, Save, Sparkles, Upload, Loader2, Download } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import Papa from 'papaparse'
+import toast from 'react-hot-toast'
 
 // The UI has two panels: Left (Main Input) and Right (Settings)
 // Plus a CSV import utility.
@@ -30,6 +32,7 @@ export default function NewJobPage() {
   const [applyLink, setApplyLink] = useState('')
   const [status, setStatus] = useState('Active')
   const [department, setDepartment] = useState('Engineering')
+  const [keyword, setKeyword] = useState('')
 
   const [importedJobs, setImportedJobs] = useState<any[]>([])
   const [showPreview, setShowPreview] = useState(false)
@@ -54,7 +57,7 @@ export default function NewJobPage() {
 
     const skillsArray = skills.split(',').map(s => s.trim()).filter(Boolean)
 
-    await supabase.from('jobs').insert({
+    const { error } = await supabase.from('jobs').insert({
       company_id: companyId,
       title,
       description,
@@ -63,10 +66,17 @@ export default function NewJobPage() {
       salary,
       skills: skillsArray,
       apply_link: applyLink,
-      status: finalStatus
+      status: finalStatus,
+      keyword
     })
 
     setLoading(false)
+    if (error) {
+       toast.error(`Database Error: ${error.message}. Did you add the keyword column?`)
+       return
+    }
+    
+    toast.success('Job created successfully!')
     router.push('/dashboard/jobs')
   }
 
@@ -84,7 +94,7 @@ export default function NewJobPage() {
         
         const validJobs = jobs.filter(j => j.title)
         
-        await supabase.from('jobs').insert(
+        const { error } = await supabase.from('jobs').insert(
           validJobs.map((job) => ({
             title: job.title,
             location: job.location,
@@ -95,11 +105,17 @@ export default function NewJobPage() {
             apply_link: job.apply_link || '',
             company_id: companyId,
             status: "Active",
+            keyword: job.keyword || ''
           }))
         )
         
         setLoading(false)
-        router.push('/dashboard/jobs')
+        if (error) {
+           toast.error(`Import Error: ${error.message}. Did you add the keyword column?`)
+        } else {
+           toast.success('Jobs imported successfully!')
+           router.push('/dashboard/jobs')
+        }
       }
     })
   }
@@ -116,12 +132,19 @@ export default function NewJobPage() {
       salary: job.salary,
       description: job.description,
       skills: job.skills ? job.skills.split(',').map((s: string) => s.trim()) : [],
-      status: 'Active'
+      status: 'Active',
+      keyword: job.keyword || ''
     }))
 
-    await supabase.from('jobs').insert(jobsToInsert)
+    const { error } = await supabase.from('jobs').insert(jobsToInsert)
     setLoading(false)
-    router.push('/dashboard/jobs')
+
+    if (error) {
+       toast.error(`Import Error: ${error.message}. Did you add the keyword column?`)
+    } else {
+       toast.success('Jobs imported successfully!')
+       router.push('/dashboard/jobs')
+    }
   }
 
   return (
@@ -174,12 +197,9 @@ export default function NewJobPage() {
                     Generate with AI
                   </Button>
                 </div>
-                <Textarea 
-                  id="description" 
-                  placeholder="Describe the role, responsibilities, and requirements..." 
-                  className="h-48 resize-none bg-gray-50/50"
+                <RichTextEditor 
                   value={description}
-                  onChange={e => setDescription(e.target.value)}
+                  onChange={setDescription}
                 />
               </div>
             </div>
@@ -230,7 +250,7 @@ export default function NewJobPage() {
                 />
               </div>
               <Button variant="ghost" className="text-gray-500 hover:text-gray-900" onClick={() => {
-                const csv = 'title,location,type,salary,description,skills,apply_link\nFrontend Developer,Remote,Full-time,$120k,Build UI,React,https://apply.co\nBackend Engineer,New York,Full-time,$130k,APIs,Node.js,https://apply.co'
+                const csv = 'title,location,type,salary,description,skills,apply_link,keyword\nFrontend Developer,Remote,Full-time,$120k,Build UI,React,https://apply.co,engineering\nBackend Engineer,New York,Full-time,$130k,APIs,Node.js,https://apply.co,engineering'
                 const blob = new Blob([csv], { type: 'text/csv' })
                 const url = window.URL.createObjectURL(blob)
                 const a = document.createElement('a')
@@ -317,6 +337,18 @@ export default function NewJobPage() {
                 <option value="Sales">Sales</option>
                 <option value="Product">Product</option>
               </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-gray-700 font-semibold" htmlFor="keyword">Filter Keyword</Label>
+              <Input 
+                id="keyword" 
+                placeholder="e.g. engineering, design" 
+                className="bg-gray-50/50 h-11" 
+                value={keyword} 
+                onChange={e => setKeyword(e.target.value)} 
+              />
+              <p className="text-xs text-gray-400">Attach to a specific career page section.</p>
             </div>
 
             <div className="pt-4 border-t border-gray-100 space-y-4">

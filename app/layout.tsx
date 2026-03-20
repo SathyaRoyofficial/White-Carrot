@@ -22,10 +22,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${poppins.variable} font-sans h-full antialiased`}
+      className={`${poppins.className} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      <body className={`${poppins.className} min-h-full flex flex-col`} suppressHydrationWarning>
         {children}
         <Toaster position="bottom-right" />
       </body>

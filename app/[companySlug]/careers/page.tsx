@@ -26,7 +26,7 @@ export async function generateMetadata(props: { params: Promise<{ companySlug: s
   }
 }
 
-export default async function PublicCareersPage(props: { params: Promise<{ companySlug: string }>, searchParams: Promise<{ preview?: string }> }) {
+export default async function PublicCareersPage(props: { params: Promise<{ companySlug: string }>, searchParams: Promise<{ preview?: string, page?: string }> }) {
   const params = await props.params
   const searchParams = await props.searchParams
   const isPreview = searchParams.preview === 'true'
@@ -78,23 +78,45 @@ export default async function PublicCareersPage(props: { params: Promise<{ compa
   const theme = pageResult.theme_settings || { primaryColor: '#5138EE', font: 'Inter' }
   const fontStyle = { fontFamily: `"${theme.font}", sans-serif` }
 
+  // Dynamically map sections to navbar links
+  const availableLinks = []
+  if (sections?.some(s => s.type === 'about')) availableLinks.push({ label: 'About', href: '#about' })
+  if (sections?.some(s => s.type === 'culture')) availableLinks.push({ label: 'Culture', href: '#culture' })
+  if (sections?.some(s => s.type === 'benefits')) availableLinks.push({ label: 'Benefits', href: '#benefits' })
+  if (sections?.some(s => s.type === 'jobs')) availableLinks.push({ label: 'Jobs', href: '#jobs' })
+
   return (
-    <main className="min-h-screen bg-white" style={fontStyle}>
-      {/* Brand Header */}
-      <nav className="w-full h-20 border-b border-gray-100 px-6 sm:px-12 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          {theme.logoUrl ? (
-            <img src={theme.logoUrl} alt={company.name} className="h-8 max-w-[150px] object-contain" />
-          ) : (
-            <div className="font-bold text-2xl tracking-tight text-gray-900">{company.name}</div>
+    <main className="min-h-screen bg-white sm:pt-6 pt-12" style={fontStyle}>
+      {/* Floating Pill Navbar */}
+      <div className="fixed top-4 sm:top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+        <nav className="pointer-events-auto bg-white/90 backdrop-blur-lg border border-gray-200/60 shadow-xl shadow-black/5 rounded-full px-4 py-3 sm:py-4 flex items-center gap-6 md:gap-12 transition-all w-max max-w-[95vw] overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-3 pl-2 sm:pl-4 shrink-0">
+            {theme.logoUrl ? (
+              <img src={theme.logoUrl} alt={company.name} className="h-6 sm:h-8 max-w-[120px] object-contain" />
+            ) : (
+              <div className="font-bold text-lg sm:text-xl tracking-tight text-gray-900 truncate">{company.name}</div>
+            )}
+          </div>
+          
+          {availableLinks.length > 0 && (
+            <div className="hidden md:flex items-center gap-8 font-medium text-sm text-gray-500">
+              {availableLinks.map(link => (
+                <a key={link.href} href={link.href} className="hover:text-gray-900 hover:scale-105 transition-all">
+                  {link.label}
+                </a>
+              ))}
+            </div>
           )}
-        </div>
-        <a href="#jobs">
-          <button className="px-5 py-2.5 rounded-full text-white font-medium hover:opacity-90 transition-opacity" style={{ backgroundColor: theme.primaryColor }}>
-            View Roles
-          </button>
-        </a>
-      </nav>
+
+          <div className="flex items-center gap-4">
+            <a href="#jobs">
+              <button className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full text-white text-xs sm:text-sm font-bold hover:opacity-90 transition-transform hover:scale-105 shadow-md flex-shrink-0" style={{ backgroundColor: theme.primaryColor }}>
+                View Roles
+              </button>
+            </a>
+          </div>
+        </nav>
+      </div>
 
       {/* Render Sections */}
       <div className="w-full">
@@ -107,14 +129,15 @@ export default async function PublicCareersPage(props: { params: Promise<{ compa
             } : { backgroundColor: theme.primaryColor + '05' }
 
             return (
-              <div key={section.id} className="relative py-32 px-6 text-center border-b border-gray-100 overflow-hidden" style={bgStyle}>
-                {section.content.image && (
-                  <div 
-                    className="absolute inset-0 z-0" 
-                    style={{ backgroundColor: `rgba(0,0,0,${section.content.opacity ?? 0.25})` }} 
-                  />
-                )}
-                <div className="relative z-10 max-w-3xl mx-auto space-y-6 animate-in slide-in-from-bottom-8 duration-700">
+              <div key={section.id} className="w-full px-4 sm:px-6 lg:px-8 py-8">
+                <div className="relative py-24 sm:py-32 px-6 text-center rounded-[2.5rem] overflow-hidden max-w-7xl mx-auto border border-gray-100/50 shadow-2xl shadow-gray-200/40 transition-shadow" style={bgStyle}>
+                  {section.content.image && (
+                    <div 
+                      className="absolute inset-0 z-0" 
+                      style={{ backgroundColor: `rgba(0,0,0,${section.content.opacity ?? 0.25})` }} 
+                    />
+                  )}
+                  <div className="relative z-10 max-w-3xl mx-auto space-y-6 animate-in slide-in-from-bottom-8 duration-700">
                   <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight" style={{ color: section.content.textColor || '#111827' }}>
                     {section.content.title}
                   </h1>
@@ -130,12 +153,13 @@ export default async function PublicCareersPage(props: { params: Promise<{ compa
                   </div>
                 </div>
               </div>
+              </div>
             )
           }
 
           if (section.type === 'about') {
             return (
-              <div key={section.id} className="py-24 px-6 max-w-4xl mx-auto text-center md:text-left text-gray-900">
+              <div id="about" key={section.id} className="py-24 px-6 max-w-4xl mx-auto text-center md:text-left text-gray-900">
                 <h2 className="text-4xl font-bold mb-8">{section.content.headline}</h2>
                 <p className="text-xl text-gray-600 leading-relaxed max-w-3xl">
                   {section.content.body}
@@ -146,16 +170,26 @@ export default async function PublicCareersPage(props: { params: Promise<{ compa
 
           if (section.type === 'culture') {
             return (
-              <div key={section.id} className="py-24 px-6 bg-gray-900 text-white rounded-[3rem] mx-4 sm:mx-12 my-12 shadow-2xl overflow-hidden relative">
+              <div id="culture" key={section.id} className="py-24 px-6 bg-gray-900 text-white rounded-[3rem] mx-4 sm:mx-12 my-12 shadow-2xl overflow-hidden relative">
                 <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: `linear-gradient(to bottom right, ${theme.primaryColor}, transparent)` }} />
                 <div className="relative z-10 max-w-4xl mx-auto text-center">
                   <h2 className="text-4xl font-bold mb-6">{section.content.headline}</h2>
                   <p className="text-xl text-gray-300 leading-relaxed mb-16">{section.content.body}</p>
                   
                   <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="aspect-square bg-white/5 rounded-3xl overflow-hidden border border-white/10"></div>
-                    <div className="aspect-square bg-white/5 rounded-3xl overflow-hidden border border-white/10 hidden sm:block"></div>
-                    <div className="aspect-square bg-white/5 rounded-3xl overflow-hidden border border-white/10"></div>
+                    {section.content.images && section.content.images.length > 0 ? (
+                      section.content.images.map((img: string, i: number) => (
+                        <div key={i} className="aspect-square bg-white/5 rounded-3xl overflow-hidden border border-white/10 relative">
+                          <img src={img} alt={`Culture ${i}`} className="absolute inset-0 w-full h-full object-cover" />
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className="aspect-square bg-white/5 rounded-3xl overflow-hidden border border-white/10"></div>
+                        <div className="aspect-square bg-white/5 rounded-3xl overflow-hidden border border-white/10 hidden sm:block"></div>
+                        <div className="aspect-square bg-white/5 rounded-3xl overflow-hidden border border-white/10"></div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -164,7 +198,7 @@ export default async function PublicCareersPage(props: { params: Promise<{ compa
 
           if (section.type === 'benefits') {
             return (
-              <div key={section.id} className="py-24 px-6 max-w-6xl mx-auto">
+              <div id="benefits" key={section.id} className="py-24 px-6 max-w-6xl mx-auto">
                 <h2 className="text-4xl font-bold text-gray-900 mb-16 text-center">{section.content.title}</h2>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   {(section.content.items || []).map((item: string, i: number) => (
@@ -185,54 +219,82 @@ export default async function PublicCareersPage(props: { params: Promise<{ compa
                   <h2 className="text-4xl font-bold text-gray-900 mb-4">{section.content.title}</h2>
                   <p className="text-xl text-gray-500 mb-12">{section.content.subtitle}</p>
                   
-                  {(!jobs || jobs.length === 0) ? (
-                    <div className="p-12 text-center text-gray-500 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                      <p className="text-lg">No open roles at the moment. Check back later!</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {jobs.map((job) => (
-                        <div key={job.id} className="p-6 sm:p-8 bg-white border border-gray-200 rounded-3xl hover:border-gray-300 hover:shadow-md transition-all group flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-                          <div>
-                            <h3 className="text-2xl font-bold text-gray-900 group-hover:text-[#5138EE] transition-colors mb-2" style={{ ':hover': { color: theme.primaryColor } } as any}>
-                              {job.title}
-                            </h3>
-                            <div className="flex flex-wrap items-center gap-3 text-gray-500 font-medium">
-                              <span>{job.location}</span>
-                              <span className="w-1 h-1 rounded-full bg-gray-300" />
-                              <span>{job.type}</span>
-                              <span className="w-1 h-1 rounded-full bg-gray-300" />
-                              <span>{job.department || 'Engineering'}</span>
+                  {(() => {
+                    const keywordFilter = section.content.keywordFilter?.trim()?.toLowerCase()
+                    const filteredJobs = keywordFilter 
+                      ? (jobs || []).filter(j => j.keyword?.toLowerCase()?.includes(keywordFilter))
+                      : (jobs || [])
+
+                    if (filteredJobs.length === 0) {
+                      return (
+                        <div className="p-12 text-center text-gray-500 bg-white rounded-3xl border border-gray-100 shadow-sm">
+                          <p className="text-lg">No open roles at the moment. Check back later!</p>
+                        </div>
+                      )
+                    }
+
+                    const perPageCount = theme.jobs?.perPage ? parseInt(theme.jobs.perPage.toString()) : 10
+                    const currentPage = searchParams.page ? parseInt(searchParams.page) : 1
+                    const displayedJobs = filteredJobs.slice(0, currentPage * perPageCount)
+
+                    return (
+                      <div className="space-y-4">
+                        {displayedJobs.map((job) => (
+                          <div key={job.id} className="p-6 sm:p-8 bg-white border border-gray-200 rounded-3xl hover:border-gray-300 hover:shadow-md transition-all group flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                            <div>
+                              <h3 className="text-2xl font-bold text-gray-900 group-hover:text-[#5138EE] transition-colors mb-2" style={{ ':hover': { color: theme.primaryColor } } as any}>
+                                {job.title}
+                              </h3>
+                              <div className="flex flex-wrap items-center gap-3 text-gray-500 font-medium">
+                                <span>{job.location}</span>
+                                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                                <span>{job.type}</span>
+                                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                                <span>{job.department || 'Engineering'}</span>
+                              </div>
+                              
+                              {job.skills && job.skills.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-4">
+                                  {job.skills.slice(0, 4).map((skill: string, idx: number) => (
+                                    <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full font-medium">
+                                      {skill}
+                                    </span>
+                                  ))}
+                                  {job.skills.length > 4 && (
+                                    <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full font-medium">
+                                      +{job.skills.length - 4} logic
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                             
-                            {job.skills && job.skills.length > 0 && (
-                              <div className="flex flex-wrap gap-2 mt-4">
-                                {job.skills.slice(0, 4).map((skill: string, idx: number) => (
-                                  <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full font-medium">
-                                    {skill}
-                                  </span>
-                                ))}
-                                {job.skills.length > 4 && (
-                                  <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full font-medium">
-                                    +{job.skills.length - 4} logic
-                                  </span>
-                                )}
-                              </div>
-                            )}
+                            <Link 
+                              href={job.apply_link || `/${company.slug}/jobs/${job.id}`}
+                              target={job.apply_link ? "_blank" : undefined}
+                              className="w-full sm:w-auto text-center px-8 py-4 rounded-xl text-white font-bold transition-transform group-hover:scale-105" 
+                              style={{ backgroundColor: theme.primaryColor }}
+                            >
+                              Apply Now
+                            </Link>
                           </div>
-                          
-                          <a 
-                            href={job.apply_link || `mailto:${job.apply_email || 'careers@' + company.slug + '.com'}?subject=Application for ${job.title}`}
-                            target={job.apply_link ? "_blank" : "_self"}
-                            className="w-full sm:w-auto text-center px-8 py-4 rounded-xl text-white font-bold transition-transform group-hover:scale-105" 
-                            style={{ backgroundColor: theme.primaryColor }}
-                          >
-                            Apply Now
-                          </a>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                        
+                        {displayedJobs.length < filteredJobs.length && (
+                          <div className="pt-8 text-center">
+                            <Link 
+                              href={`?page=${currentPage + 1}#jobs`}
+                              scroll={false} 
+                              className="inline-block px-8 py-3 rounded-full font-bold transition-all hover:scale-105 border-2"
+                              style={{ borderColor: theme.primaryColor, color: theme.primaryColor }}
+                            >
+                              Load More Roles
+                            </Link>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })()}
                 </div>
               </div>
             )
@@ -251,8 +313,11 @@ export default async function PublicCareersPage(props: { params: Promise<{ compa
             {theme.contactEmail || `careers@${company.slug}.com`}
           </a>
         </div>
-        <div className="text-gray-400 text-sm">
-          <p>Built with <a href="/" className="font-semibold hover:text-gray-600 transition-colors" style={{ color: theme.primaryColor }}>Whitecarrot</a></p>
+        <div className="flex justify-center items-center text-gray-400 text-sm gap-2">
+          <p>Built with</p>
+          <a href="/" className="transition-opacity opacity-80 hover:opacity-100">
+            <img src="/logo.png" alt="Whitecarrot" className="h-5 object-contain" />
+          </a>
         </div>
       </footer>
     </main>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ExternalLink, Edit2, Copy, Search, Star, Loader2, Plus, LayoutTemplate } from 'lucide-react'
+import { ExternalLink, Edit2, Copy, Search, Star, Loader2, Plus, LayoutTemplate, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -33,7 +33,6 @@ export default function DashboardPage() {
             .from('pages')
             .select('*')
             .eq('company_id', companyData.id)
-            .order('created_at', { ascending: false })
             
           const sortedPages = (pages || []).sort((a, b) => {
             const aStar = a.theme_settings?.is_starred ? 1 : 0
@@ -78,6 +77,18 @@ export default function DashboardPage() {
     
     setProjects(prev => prev.map(p => p.id === pageId ? { ...p, theme_settings: { ...p.theme_settings, is_starred: updated } } : p).sort((a, b) => Number(b.theme_settings?.is_starred || false) - Number(a.theme_settings?.is_starred || false)))
     await supabase.from('pages').update({ theme_settings: { ...target.theme_settings, is_starred: updated } }).eq('id', pageId)
+  }
+
+  const handleDeleteProject = async (pageId: string) => {
+    if (!window.confirm('Are you sure you want to delete this career page? This action cannot be undone.')) return
+    
+    const { error } = await supabase.from('pages').delete().eq('id', pageId)
+    if (error) {
+      toast.error('Failed to delete project')
+    } else {
+      toast.success('Project deleted successfully')
+      setProjects(prev => prev.filter(p => p.id !== pageId))
+    }
   }
 
   if (loading) {
@@ -169,6 +180,10 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="pt-4 border-t border-gray-50 flex items-center justify-between gap-2 mt-auto">
+                  <Button variant="ghost" size="sm" className="h-8 px-2 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => handleDeleteProject(project.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                  
                   {project.published && (
                     <Button variant="ghost" size="sm" className="h-8 px-2 text-gray-500 hover:text-gray-900" onClick={() => {
                         navigator.clipboard.writeText(publicUrl)

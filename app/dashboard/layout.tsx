@@ -16,7 +16,6 @@ export default function DashboardLayout({
   const navItems = [
     { name: 'Career Pages', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Jobs', href: '/dashboard/jobs', icon: Briefcase },
-    { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart },
     { name: 'Global Settings', href: '/dashboard/settings', icon: Settings },
   ]
 
@@ -31,10 +30,7 @@ export default function DashboardLayout({
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div className="h-16 flex items-center px-6 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-[#5138EE] rounded flex items-center justify-center text-white font-bold text-xs">
-              C
-            </div>
-            <span className="font-bold tracking-tight text-gray-900">Whitecarrot</span>
+            <img src="/logo.png" alt="Whitecarrot" className="h-7 object-contain" />
           </div>
         </div>
 

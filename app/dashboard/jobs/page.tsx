@@ -3,14 +3,18 @@
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, MoreHorizontal, FileSpreadsheet, Search } from 'lucide-react'
+import { Plus, MoreHorizontal, FileSpreadsheet, Search, Trash2, Edit3, X, Save } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedJobs, setSelectedJobs] = useState<Set<string>>(new Set())
   const supabase = createClient()
 
   useEffect(() => {
@@ -38,6 +42,57 @@ export default function JobsPage() {
     }
     loadJobs()
   }, [])
+
+  const toggleSelectAll = () => {
+    if (selectedJobs.size === jobs.length && jobs.length > 0) {
+      setSelectedJobs(new Set())
+    } else {
+      setSelectedJobs(new Set(jobs.map(j => j.id)))
+    }
+  }
+
+  const toggleSelectJob = (id: string) => {
+    const newSet = new Set(selectedJobs)
+    if (newSet.has(id)) newSet.delete(id)
+    else newSet.add(id)
+    setSelectedJobs(newSet)
+  }
+
+  const handleDeleteSelected = async () => {
+    if (selectedJobs.size === 0) return
+    if (!window.confirm(`Are you sure you want to delete ${selectedJobs.size} job(s)? This action cannot be undone.`)) return
+    
+    setLoading(true)
+    const idsToDelete = Array.from(selectedJobs)
+    const { error } = await supabase.from('jobs').delete().in('id', idsToDelete)
+    
+    if (error) {
+      toast.error('Failed to delete jobs')
+    } else {
+      toast.success(`${idsToDelete.length} jobs deleted`)
+      setJobs(prev => prev.filter(j => !selectedJobs.has(j.id)))
+      setSelectedJobs(new Set())
+    }
+    setLoading(false)
+  }
+
+  const [editingJob, setEditingJob] = useState<any>(null)
+  const [editDescription, setEditDescription] = useState('')
+
+  const handleSaveDescription = async () => {
+    if (!editingJob) return
+    setLoading(true)
+    const { error } = await supabase.from('jobs').update({ description: editDescription }).eq('id', editingJob.id)
+    
+    if (error) {
+      toast.error('Failed to update description')
+    } else {
+      toast.success('Description updated successfully!')
+      setJobs(prev => prev.map(j => j.id === editingJob.id ? { ...j, description: editDescription } : j))
+      setEditingJob(null)
+    }
+    setLoading(false)
+  }
 
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-6 animate-in fade-in">
@@ -68,6 +123,11 @@ export default function JobsPage() {
           <div className="text-sm text-gray-500">
             {jobs.length} roles found
           </div>
+          {selectedJobs.size > 0 && (
+            <Button variant="ghost" size="sm" onClick={handleDeleteSelected} className="ml-auto text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors h-9 px-3">
+              <Trash2 className="w-4 h-4 mr-2" /> Delete Selected ({selectedJobs.size})
+            </Button>
+          )}
         </div>
 
         {loading ? (
@@ -87,30 +147,96 @@ export default function JobsPage() {
           </div>
         ) : (
           <div className="divide-y divide-gray-50">
+            {jobs.length > 0 && (
+              <div className="p-4 bg-gray-50/50 flex items-center gap-4 border-b border-gray-100">
+                <input 
+                  type="checkbox" 
+                  className="w-4 h-4 rounded border-gray-300 text-[#5138EE] focus:ring-[#5138EE]"
+                  checked={selectedJobs.size === jobs.length && jobs.length > 0}
+                  onChange={toggleSelectAll}
+                />
+                <span className="text-sm font-medium text-gray-500">Select All</span>
+              </div>
+            )}
             {jobs.map((job) => (
-              <div key={job.id} className="p-4 hover:bg-gray-50 flex items-center justify-between transition-colors group">
-                <div>
-                  <h3 className="font-semibold text-gray-900 group-hover:text-[#5138EE] transition-colors">{job.title}</h3>
-                  <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
-                    <span>{job.location}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-300" />
-                    <span>{job.type}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-300" />
-                    <span className={job.status === 'Active' ? 'text-green-600 font-medium' : 'text-yellow-600 font-medium'}>
-                      {job.status}
-                    </span>
+              <div key={job.id} className="p-4 hover:bg-gray-50 flex items-center gap-4 transition-colors group">
+                <input 
+                  type="checkbox" 
+                  className="w-4 h-4 rounded border-gray-300 text-[#5138EE] focus:ring-[#5138EE]"
+                  checked={selectedJobs.has(job.id)}
+                  onChange={() => toggleSelectJob(job.id)}
+                />
+                <div className="flex-1 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 group-hover:text-[#5138EE] transition-colors">{job.title}</h3>
+                    <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                      <span>{job.location}</span>
+                      <span className="w-1 h-1 rounded-full bg-gray-300" />
+                      <span>{job.type}</span>
+                      <span className="w-1 h-1 rounded-full bg-gray-300" />
+                      <span className={job.status === 'Active' ? 'text-green-600 font-medium' : 'text-yellow-600 font-medium'}>
+                        {job.status}
+                      </span>
+                      {job.keyword && (
+                        <>
+                          <span className="w-1 h-1 rounded-full bg-gray-300" />
+                          <span className="text-[#5138EE] bg-[#5138EE]/10 px-2 rounded-full text-xs font-medium py-0.5">Keyword: {job.keyword}</span>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-900">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
+                  <div>
+                    <Button variant="ghost" size="icon" className="text-gray-400 hover:text-[#5138EE] transition-opacity" onClick={() => {
+                        setEditingJob(job)
+                        setEditDescription(job.description || '')
+                    }}>
+                      <Edit3 className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" onClick={async () => {
+                       if(window.confirm('Delete this job?')) {
+                         const { error } = await supabase.from('jobs').delete().eq('id', job.id)
+                         if(!error) setJobs(prev => prev.filter(j => j.id !== job.id))
+                       }
+                    }}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         )}
       </Card>
+
+      {/* Description Edit Modal */}
+      {editingJob && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
+          <Card className="w-full max-w-3xl bg-white shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Edit Description</h3>
+                <p className="text-sm text-gray-500 mt-1">{editingJob.title} • {editingJob.location}</p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setEditingJob(null)} className="text-gray-400 hover:bg-gray-100 rounded-full">
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1 bg-gray-50/30">
+              <label className="text-sm font-semibold text-gray-900 mb-2 block">Job Description</label>
+              <RichTextEditor 
+                value={editDescription}
+                onChange={setEditDescription}
+              />
+            </div>
+            <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/50 rounded-b-xl">
+              <Button variant="outline" onClick={() => setEditingJob(null)}>Cancel</Button>
+              <Button onClick={handleSaveDescription} disabled={loading} className="bg-[#5138EE] hover:bg-[#432dd4]">
+                {loading ? 'Saving...' : <><Save className="w-4 h-4 mr-2" /> Save Description</>}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

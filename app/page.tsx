@@ -7,11 +7,7 @@ export default function Home() {
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 md:px-12 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          {/* Logo Placeholder */}
-          <div className="w-8 h-8 bg-[#5138EE] rounded flex items-center justify-center text-white font-bold">
-            C
-          </div>
-          <span className="font-bold text-xl tracking-tight text-gray-900">Whitecarrot</span>
+          <img src="/logo.png" alt="Whitecarrot" className="h-8 object-contain" />
         </div>
         <div className="flex items-center gap-4">
           <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">

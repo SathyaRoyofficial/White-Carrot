@@ -69,7 +69,14 @@ const RenderJobs = ({ content, theme, pageId }: { content: any, theme: any, page
       const { data: page } = await supabase.from('pages').select('company_id').eq('id', pageId).single()
       if (page?.company_id) {
         const { data } = await supabase.from('jobs').select('*').eq('company_id', page.company_id).eq('status', 'Active')
-        setJobs(data || [])
+        if (data) {
+          const keywordFilter = content.keywordFilter?.trim()?.toLowerCase()
+          if (keywordFilter) {
+            setJobs(data.filter((j: any) => j.keyword?.toLowerCase()?.includes(keywordFilter)))
+          } else {
+            setJobs(data)
+          }
+        }
       }
     }
     fetchJobs()
@@ -112,9 +119,19 @@ const RenderCulture = ({ content }: { content: any }) => (
       <p className="text-lg text-gray-300 leading-relaxed mb-10">{content.body}</p>
       {/* Mock Image Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="h-48 bg-white/10 rounded-xl"></div>
-        <div className="h-48 bg-white/10 rounded-xl"></div>
-        <div className="h-48 bg-white/10 rounded-xl hidden md:block"></div>
+        {content.images && content.images.length > 0 ? (
+          content.images.map((img: string, i: number) => (
+            <div key={i} className="h-48 bg-white/10 rounded-xl overflow-hidden relative border border-white/10">
+              <img src={img} alt={`Culture ${i}`} className="absolute inset-0 w-full h-full object-cover" />
+            </div>
+          ))
+        ) : (
+          <>
+            <div className="h-48 bg-white/10 rounded-xl border border-white/10"></div>
+            <div className="h-48 bg-white/10 rounded-xl border border-white/10"></div>
+            <div className="h-48 bg-white/10 rounded-xl border border-white/10 hidden md:block"></div>
+          </>
+        )}
       </div>
     </div>
   </div>
@@ -210,52 +227,93 @@ export default function LivePreview() {
       reorderSections(arrayMove(sections, oldIndex, newIndex))
     }
   }
+  const availableLinks: string[] = []
+  if (sections.some((s: any) => s.type === 'about')) availableLinks.push('About')
+  if (sections.some((s: any) => s.type === 'culture')) availableLinks.push('Culture')
+  if (sections.some((s: any) => s.type === 'benefits')) availableLinks.push('Benefits')
+  if (sections.some((s: any) => s.type === 'jobs')) availableLinks.push('Jobs')
+
+  const primaryColor = theme.primaryColor || '#5138EE'
+  const fontStyle = { fontFamily: `"${theme.font || 'Inter'}", sans-serif` }
 
   return (
-    <div className="w-full h-[90vh] overflow-y-auto pb-32" style={{ fontFamily: `"${theme.font}", sans-serif` }}>
-      {/* Brand Header */}
-      <div className="w-full h-16 border-b border-gray-100 px-8 flex items-center justify-between pointer-events-none sticky top-0 bg-white/80 backdrop-blur-md z-30">
-        <div className="flex items-center gap-2">
-          {theme.logoUrl ? (
-            <img src={theme.logoUrl} alt="Logo" className="h-8 max-w-[120px] object-contain" />
-          ) : (
-             <div className="font-bold text-xl tracking-tight text-gray-900">Company Logo</div>
-          )}
+    <div className="w-full h-[90vh] overflow-y-auto bg-slate-50" style={fontStyle}>
+      {/* Simulated Browser Bar */}
+      <div className="w-full h-12 bg-white flex items-center px-4 border-b border-gray-200 sticky top-0 z-50 rounded-t-lg">
+        <div className="flex space-x-2">
+          <div className="w-3 h-3 rounded-full bg-red-400"></div>
+          <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+          <div className="w-3 h-3 rounded-full bg-green-400"></div>
         </div>
-        <div className="text-sm font-medium text-gray-500">Careers</div>
+        <div className="mx-auto text-sm text-gray-500 font-medium">Live Preview</div>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
-          <div className="min-h-[500px]">
-             {sections.length === 0 ? (
-               <div className="flex flex-col items-center justify-center h-[400px] text-gray-400">
-                 <p>No sections added yet.</p>
-                 <p className="text-sm mt-1">Add sections from the Left Panel.</p>
-               </div>
-             ) : (
-               sections.map(section => <SortableSection key={section.id} section={section} />)
-             )}
-          </div>
-        </SortableContext>
-      </DndContext>
-
-      {/* Dynamic Footer Preview */}
-      <div className="py-16 border-t border-gray-100 mt-20 text-center flex flex-col items-center">
-        <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-gray-100 text-2xl">
-          💬
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">Get in Touch</h2>
-        <p className="text-gray-500 max-w-md mx-auto mb-8">
-          {theme.contactText || 'Have questions about our hiring process? Reach out to our team.'}
-        </p>
-        <div className="px-6 py-3 rounded-full font-medium inline-block mb-16 transition-transform hover:scale-105" style={{ backgroundColor: theme.primaryColor + '15', color: theme.primaryColor }}>
-          {theme.contactEmail || 'careers@company.com'}
-        </div>
+      <div className="relative w-full min-h-[800px] bg-white pt-24 pb-32 shadow-xl border-x border-b border-gray-200 rounded-b-lg">
         
-        <p className="text-sm text-gray-400">Built with <span className="font-semibold transition-colors" style={{ color: theme.primaryColor }}>Whitecarrot</span></p>
-      </div>
+        {/* Floating Pill Navbar Wrapper */}
+        <div className="absolute top-6 left-0 right-0 z-40 flex justify-center px-4 pointer-events-none">
+          <nav className="pointer-events-auto bg-white/90 backdrop-blur-lg border border-gray-200/60 shadow-xl shadow-black/5 rounded-full px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-6 md:gap-12 transition-all w-max max-w-[95%] overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-2 pl-2 overflow-hidden shrink-0">
+              {theme.logoUrl ? (
+                <img src={theme.logoUrl} alt="Logo" className="h-6 object-contain" />
+              ) : (
+                <div className="font-bold text-lg tracking-tight text-gray-900 truncate">Company Logo</div>
+              )}
+            </div>
+            
+            {availableLinks.length > 0 && (
+              <div className="hidden md:flex items-center gap-4 lg:gap-6 font-medium text-xs text-gray-500">
+                {availableLinks.map(link => (
+                  <span key={link} className="hover:text-gray-900 transition-colors cursor-pointer">
+                    {link}
+                  </span>
+                ))}
+              </div>
+            )}
+  
+            <button className="px-4 py-2 rounded-full text-white text-xs font-bold shadow-md flex-shrink-0 ml-4" style={{ backgroundColor: primaryColor }}>
+              View Roles
+            </button>
+          </nav>
+        </div>
 
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+            <div className="min-h-[500px]">
+               {sections.length === 0 ? (
+                 <div className="flex flex-col items-center justify-center h-[400px] text-gray-400">
+                   <p>No sections added yet.</p>
+                   <p className="text-sm mt-1">Add sections from the Left Panel.</p>
+                 </div>
+               ) : (
+                 sections.map(section => <SortableSection key={section.id} section={section} />)
+               )}
+            </div>
+          </SortableContext>
+        </DndContext>
+
+        {/* Dynamic Footer Preview */}
+        <div className="py-16 border-t border-gray-100 mt-20 text-center flex flex-col items-center">
+          <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-gray-100 text-2xl">
+            💬
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Get in Touch</h2>
+          <p className="text-gray-500 max-w-md mx-auto mb-8">
+            {theme.contactText || 'Have questions about our hiring process? Reach out to our team.'}
+          </p>
+          <div className="px-6 py-3 rounded-full font-medium inline-block mb-16 transition-transform hover:scale-105" style={{ backgroundColor: theme.primaryColor + '15', color: theme.primaryColor }}>
+            {theme.contactEmail || 'careers@company.com'}
+          </div>
+          
+          <div className="flex justify-center items-center text-gray-400 text-sm gap-2">
+            <p>Built with</p>
+            <span className="transition-opacity opacity-80">
+              <img src="/logo.png" alt="Whitecarrot" className="h-5 object-contain" />
+            </span>
+          </div>
+        </div>
+
+      </div>
     </div>
   )
 }

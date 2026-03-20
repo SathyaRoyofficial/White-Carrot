@@ -62,9 +62,12 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50/50 p-4">
       <div className="w-full max-w-sm space-y-6 rounded-2xl bg-white p-8 shadow-sm border border-gray-100">
+        <div className="flex justify-center mb-6">
+          <img src="/logo.png" alt="Whitecarrot" className="h-10 object-contain" />
+        </div>
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-            Welcome to Whitecarrot
+            Welcome back
           </h1>
           <p className="text-sm text-gray-500">
             Log in to manage your careers page

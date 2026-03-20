@@ -25,8 +25,11 @@ export default function LeftPanel() {
     if (!pageId) return
     setSaving(true)
 
-    // Update theme
-    await supabase.from('pages').update({ theme_settings: theme, published: false }).eq('id', pageId)
+    // Update theme safely
+    const { data: page } = await supabase.from('pages').select('theme_settings').eq('id', pageId).single()
+    const currentTheme = page?.theme_settings || {}
+    const updatedTheme = { ...currentTheme, ...theme }
+    await supabase.from('pages').update({ theme_settings: updatedTheme, published: false }).eq('id', pageId)
     
     // Update sections (re-insert or update). For simplicity, we can delete all and insert new.
     await supabase.from('sections').delete().eq('page_id', pageId)

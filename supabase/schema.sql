@@ -39,7 +39,24 @@ CREATE TABLE jobs (
   skills TEXT[],
   apply_link TEXT,
   apply_email TEXT,
+  keyword TEXT,
   status TEXT DEFAULT 'Draft', -- 'Active', 'Draft'
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE applications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  job_id UUID REFERENCES jobs(id) ON DELETE CASCADE,
+  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  current_company TEXT,
+  linkedin_url TEXT,
+  location TEXT,
+  resume_url TEXT NOT NULL,
+  right_to_work TEXT,
+  willing_to_relocate TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -48,6 +65,7 @@ ALTER TABLE companies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
 
 -- Allow users to read/write their own company data
 CREATE POLICY "Users can manage their own companies" ON companies
@@ -67,6 +85,14 @@ CREATE POLICY "Users can manage their company jobs" ON jobs
   FOR ALL USING (
     company_id IN (SELECT id FROM companies WHERE user_id = auth.uid())
   );
+
+CREATE POLICY "Users can read their company applications" ON applications
+  FOR SELECT USING (
+    company_id IN (SELECT id FROM companies WHERE user_id = auth.uid())
+  );
+
+CREATE POLICY "Anyone can insert applications" ON applications
+  FOR INSERT WITH CHECK (true);
 
 -- Public read access for published pages and jobs
 CREATE POLICY "Anyone can read published pages" ON pages

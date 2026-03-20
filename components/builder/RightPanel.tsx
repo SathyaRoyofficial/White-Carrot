@@ -188,6 +188,15 @@ export default function RightPanel() {
                 onChange={(e) => handleUpdate('subtitle', e.target.value)}
               />
             </div>
+            <div className="space-y-2 mt-4">
+              <Label>Keyword Filter</Label>
+              <Input 
+                placeholder="e.g. engineering"
+                value={activeSection.content.keywordFilter || ''} 
+                onChange={(e) => handleUpdate('keywordFilter', e.target.value)}
+              />
+              <p className="text-xs text-gray-400">Only display jobs that contain this keyword.</p>
+            </div>
             <p className="text-xs text-gray-400 border-l-2 border-orange-300 pl-3 mt-4">
               Note: This block automatically renders active jobs from your database on the live page.
             </p>
