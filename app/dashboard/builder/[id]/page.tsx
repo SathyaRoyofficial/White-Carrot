@@ -89,15 +89,15 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-y-auto lg:overflow-hidden relative">
         {/* Left Panel - Controls */}
-        <div className="w-80 flex-shrink-0 bg-white border-r border-gray-200 overflow-y-auto">
+        <div className="w-full lg:w-80 flex-shrink-0 bg-white border-b lg:border-b-0 lg:border-r border-gray-200 overflow-y-visible lg:overflow-y-auto order-3 lg:order-1">
           <LeftPanel />
         </div>
 
         {/* Center - Live Preview Area */}
-        <div className="flex-1 overflow-y-auto relative flex flex-col items-center p-8 bg-gray-50/50">
-          <div className="mb-4 text-sm font-medium text-gray-500 flex items-center justify-between w-full max-w-[1000px]">
+        <div className="w-full lg:flex-1 overflow-y-auto relative flex flex-col items-center p-0 lg:p-8 bg-gray-50/50 order-1 lg:order-2 h-[50vh] lg:h-auto border-b lg:border-b-0 border-gray-200 shrink-0 sticky top-0 z-20 lg:static">
+          <div className="hidden lg:flex mb-4 text-sm font-medium text-gray-500 items-center justify-between w-full max-w-[1000px]">
             <span>Live Preview</span>
             <div className="flex gap-2">
               <span className="w-3 h-3 rounded-full bg-red-400"></span>
@@ -105,13 +105,13 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
               <span className="w-3 h-3 rounded-full bg-green-400"></span>
             </div>
           </div>
-          <div className="w-full max-w-[1000px] bg-white rounded-xl shadow-xl overflow-hidden min-h-[800px] border border-gray-200 ring-1 ring-black/5">
+          <div className="w-full h-full lg:h-auto lg:max-w-[1000px] bg-white lg:rounded-xl shadow-none lg:shadow-xl overflow-y-auto lg:overflow-hidden lg:min-h-[800px] border-none lg:border border-gray-200 lg:ring-1 ring-black/5">
             <LivePreview />
           </div>
         </div>
 
         {/* Right Panel - Properties */}
-        <div className="w-80 flex-shrink-0 bg-white border-l border-gray-200 overflow-y-auto">
+        <div className="w-full lg:w-80 flex-shrink-0 bg-white border-b lg:border-b-0 lg:border-l border-gray-200 overflow-y-visible lg:overflow-y-auto order-2 lg:order-3">
           <RightPanel />
         </div>
       </div>
