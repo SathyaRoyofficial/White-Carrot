@@ -13,7 +13,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
   const pageId = unwrappedParams.id
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
-  const { setInitialData, theme, updateTheme } = useBuilderStore()
+  const { setInitialData, theme, updateTheme, selectedSectionId } = useBuilderStore()
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function BuilderPage({ params }: { params: Promise<{ id: string }
         </div>
 
         {/* Right Panel - Properties */}
-        <div className={`w-full lg:w-80 flex-shrink-0 bg-white border-y lg:border-y-0 lg:border-l border-gray-200 overflow-y-visible lg:overflow-y-auto order-2 lg:order-3 shadow-md lg:shadow-none ${!useBuilderStore().selectedSectionId ? 'hidden lg:block' : 'block'}`}>
+        <div className={`w-full lg:w-80 flex-shrink-0 bg-white border-y lg:border-y-0 lg:border-l border-gray-200 overflow-y-visible lg:overflow-y-auto order-2 lg:order-3 shadow-md lg:shadow-none ${!selectedSectionId ? 'hidden lg:block' : 'block'}`}>
           <RightPanel />
         </div>
       </div>
