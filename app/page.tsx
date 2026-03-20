@@ -24,7 +24,7 @@ export default function Home() {
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-6 md:px-12 py-24 text-center">
         <div className="inline-flex items-center rounded-full border border-[#5138EE]/20 bg-[#5138EE]/5 px-3 py-1 text-sm font-medium text-[#5138EE] mb-8">
-          🚀 The Spotify-like experience for hiring
+          🚀 The Baap of all hiring platforms
         </div>
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-6 w-full max-w-4xl mx-auto leading-tight">
           Hiring Made Easy. <br/>
