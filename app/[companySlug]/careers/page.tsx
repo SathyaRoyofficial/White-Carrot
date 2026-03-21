@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { Metadata } from 'next'
+import JobBoardClient from '@/components/public/JobBoardClient'
 
 export async function generateMetadata(props: { params: Promise<{ companySlug: string }> }): Promise<Metadata> {
   const params = await props.params
@@ -234,65 +235,14 @@ export default async function PublicCareersPage(props: { params: Promise<{ compa
                     }
 
                     const perPageCount = theme.jobs?.perPage ? parseInt(theme.jobs.perPage.toString()) : 10
-                    const currentPage = searchParams.page ? parseInt(searchParams.page) : 1
-                    const displayedJobs = filteredJobs.slice(0, currentPage * perPageCount)
 
                     return (
-                      <div className="space-y-4">
-                        {displayedJobs.map((job) => (
-                          <div key={job.id} className="p-6 sm:p-8 bg-white border border-gray-200 rounded-3xl hover:border-gray-300 hover:shadow-md transition-all group flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-                            <div>
-                              <h3 className="text-2xl font-bold text-gray-900 group-hover:text-[#5138EE] transition-colors mb-2" style={{ ':hover': { color: theme.primaryColor } } as any}>
-                                {job.title}
-                              </h3>
-                              <div className="flex flex-wrap items-center gap-3 text-gray-500 font-medium">
-                                <span>{job.location}</span>
-                                <span className="w-1 h-1 rounded-full bg-gray-300" />
-                                <span>{job.type}</span>
-                                <span className="w-1 h-1 rounded-full bg-gray-300" />
-                                <span>{job.department || 'Engineering'}</span>
-                              </div>
-                              
-                              {job.skills && job.skills.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mt-4">
-                                  {job.skills.slice(0, 4).map((skill: string, idx: number) => (
-                                    <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full font-medium">
-                                      {skill}
-                                    </span>
-                                  ))}
-                                  {job.skills.length > 4 && (
-                                    <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full font-medium">
-                                      +{job.skills.length - 4} logic
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                            
-                            <Link 
-                              href={job.apply_link || `/${company.slug}/jobs/${job.id}`}
-                              target={job.apply_link ? "_blank" : undefined}
-                              className="w-full sm:w-auto text-center px-8 py-4 rounded-xl text-white font-bold transition-transform group-hover:scale-105" 
-                              style={{ backgroundColor: theme.primaryColor }}
-                            >
-                              Apply Now
-                            </Link>
-                          </div>
-                        ))}
-                        
-                        {displayedJobs.length < filteredJobs.length && (
-                          <div className="pt-8 text-center">
-                            <Link 
-                              href={`?page=${currentPage + 1}#jobs`}
-                              scroll={false} 
-                              className="inline-block px-8 py-3 rounded-full font-bold transition-all hover:scale-105 border-2"
-                              style={{ borderColor: theme.primaryColor, color: theme.primaryColor }}
-                            >
-                              Load More Roles
-                            </Link>
-                          </div>
-                        )}
-                      </div>
+                      <JobBoardClient 
+                        jobs={filteredJobs} 
+                        theme={theme} 
+                        perPageCount={perPageCount} 
+                        companySlug={company.slug} 
+                      />
                     )
                   })()}
                 </div>
