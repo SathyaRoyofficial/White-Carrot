@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+#The project is been named as career craft initially however returned in the name of white carrot for training purpose only
 
-## Getting Started
+⚪ How to Run
 
-First, run the development server:
+• Clone and Install the Repo
+-- git clone https://github.com/SathyaRoyofficial/White-Carrot.git
+-- cd careercraft
+-- npm install
 
-```bash
-npm run dev
+• env variables
+-- create a .env.local at root folder
+    Copy and paste your Supabase Keys as follows 
+
+--  NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+--  NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+• Start the Development Server
+-- npm run dev
+-- yarn dev
 # or
-yarn dev
+-- pnpm dev
 # or
-pnpm dev
-# or
-bun dev
-```
+-- bun dev
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Go to localhost:3000 to view the live server or 
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Deploy Virtually on Vercel by connecting the github connect or directly deploy on vercel to view it live
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Check the Application Live Here** : https://white-carrot-seven.vercel.app/
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+⚪ What I Built?
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Visual Page Builder** : Built a Career Page interface featuring live-updating Zustand state stores and `@dnd-kit` sortable columns.
+- **Applicant Tracking System (ATS)**: Integrated a job creation engine supporting Rich Text WYSIWYG editing, bulk CSV imports, and automated pagination tracking.
+- **Dynamic Routing**: Leveraged Next.js dynamic slugs (`/[companySlug]/careers`) to auto-hydrate customized themes and SEO properties on the fly. 
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+⚪ Improvement Plan
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+• Custom Domain : For now we are based on vercel and slug based on vercel , in future we can let users map to there own custom domain
+• Team Collaboration : Now, the application is limited to one user which is equal to one company , in future there might be a collaborate option so teams from the same company can access the application easily
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+⚪ Step by Step Guide
+
+- **Onboarding**: Create an account, provide your company name, and the system automatically generates a unique URL slug for you.
+- **Build the Portal**: Navigate to "Career Pages". Jump into the visual editor. Drag and drop "Hero", "Culture", and "Benefits" blocks. Customize your primary brand colors in the Theme tab. Click "Save Draft", then set to Published.
+- **Open Jobs**: Go to the Jobs tab. Individually format job descriptions using the built-in Text Editor, or upload a CSV to bulk-import 50 roles at once.
+- **Share**: Copy your distinct `whitecarrot.io/your-slug/careers` link and post it on LinkedIn. Candidates will see a heavily customized timeline tailored perfectly to your brand and open roles.
